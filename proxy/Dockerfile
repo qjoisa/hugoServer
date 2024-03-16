@@ -1,13 +1,17 @@
 # Используем официальный образ Go как базовый
-FROM golang:1.16-alpine as builder
+FROM golang:1.21-alpine as builder
 
 # Устанавливаем рабочую директорию внутри контейнера
 WORKDIR /app
 
+RUN go mod init proxy
+
+RUN go mod download && go mod verify
+
 # Копируем исходники приложения в рабочую директорию
 COPY . .
 # Скачиваем все зависимости
-RUN go mod init test && go mod tidy
+RUN go mod tidy
 
 # Собираем приложение
 RUN go build -o main
