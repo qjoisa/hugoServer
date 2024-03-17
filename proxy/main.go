@@ -16,7 +16,7 @@ func main() {
 	r.Use(proxy.ReverseProxy)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/api/", APIHandler)
+	r.Get("/api/*", APIHandler)
 
 	http.ListenAndServe(":8080", r)
 }
@@ -38,13 +38,14 @@ func (rp *ReverseProxy) ReverseProxy(next http.Handler) http.Handler {
 		if strings.HasPrefix(r.URL.String(), "/api/") {
 			next.ServeHTTP(w, r)
 			return
-		} else {
-			rev := httputil.ReverseProxy{Rewrite: func(r *httputil.ProxyRequest) {
-				r.SetURL(&url.URL{Scheme: "http", Host: rp.host + ":" + rp.port})
-				r.SetXForwarded()
-			}}
-			rev.ServeHTTP(w, r)
 		}
+		rev := httputil.ReverseProxy{Rewrite: func(r *httputil.ProxyRequest) {
+			r.SetURL(&url.URL{Scheme: "http", Host: rp.host + ":" + rp.port})
+			r.SetXForwarded()
+		}}
+		//httputil.NewSingleHostReverseProxy(&url.URL{Scheme: "http", Host: rp.host + ":" + rp.port}).ServeHTTP(w, r)
+		rev.ServeHTTP(w, r)
+
 	})
 }
 
