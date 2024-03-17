@@ -1,12 +1,17 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -54,20 +59,30 @@ func APIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from API"))
 }
 
-//
-//const content = ``
-//
-//func WorkerTest() {
-//	t := time.NewTicker(1 * time.Second)
-//	var b byte = 0
-//	for {
-//		select {
-//		case <-t.C:
-//			err := os.WriteFile("/app/static/_index.md", []byte(fmt.Sprintf(content, b)), 0644)
-//			if err != nil {
-//				log.Println(err)
-//			}
-//			b++
-//		}
-//	}
-//}
+const content = ``
+
+func WorkerTest() {
+	t := time.NewTicker(5 * time.Second)
+	var tn string
+	var b byte = 0
+	fileData, err := os.ReadFile("/app/static/tasks/_index.md")
+	fmt.Println(string(fileData))
+	if err != nil {
+		log.Fatal(err)
+	}
+	nTime := bytes.LastIndex(fileData, []byte("Текущее время:"))
+	nCounter := bytes.LastIndex(fileData, []byte("Счетчик:"))
+	for {
+		tn = time.Now().Format("2006-01-02 15:04:05")
+		select {
+		case <-t.C:
+			res := append(fileData[:nTime], append([]byte(tn), fileData[nTime+len(tn):]...)...)
+			res = append(fileData[:nCounter], append([]byte(tn), fileData[nCounter+len(tn):]...)...)
+			err := os.WriteFile("/app/static/_index.md", res, 0644)
+			if err != nil {
+				log.Println(err)
+			}
+			b++
+		}
+	}
+}
