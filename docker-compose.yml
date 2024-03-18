@@ -17,6 +17,8 @@ services:
     container_name: proxy
     volumes:
       - "./hugo/content:/app/static"
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
     ports:
       - "8080:8080"
     networks:
