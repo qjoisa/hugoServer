@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"log"
@@ -10,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -17,7 +17,7 @@ import (
 func main() {
 	r := chi.NewRouter()
 	proxy := NewReverseProxy("hugo", "1313")
-
+	go WorkerTest()
 	r.Use(proxy.ReverseProxy)
 	r.Use(middleware.Recoverer)
 
@@ -62,27 +62,38 @@ func APIHandler(w http.ResponseWriter, r *http.Request) {
 const content = ``
 
 func WorkerTest() {
-	t := time.NewTicker(5 * time.Second)
+	t := time.NewTicker(1 * time.Second)
 	var tn string
-	var b byte = 0
+	var b, i int = 0, 0
+	var counterLine, timeLine int
 	fileData, err := os.ReadFile("/app/static/tasks/_index.md")
-	fmt.Println(string(fileData))
 	if err != nil {
 		log.Fatal(err)
 	}
-	nTime := bytes.LastIndex(fileData, []byte("Текущее время:"))
-	nCounter := bytes.LastIndex(fileData, []byte("Счетчик:"))
+	lines := bytes.Split(fileData, []byte("\n"))
+	for i, l := range lines {
+		if bytes.Contains(l, []byte("Счетчик:")) {
+			counterLine = i
+		}
+		if bytes.Contains(l, []byte("Текущее время:")) {
+			timeLine = i
+		}
+	}
+
 	for {
 		tn = time.Now().Format("2006-01-02 15:04:05")
+		lines[timeLine] = []byte("Текущее время: " + tn)
+		lines[counterLine] = []byte("Счетчик: " + strconv.Itoa(b))
 		select {
 		case <-t.C:
-			res := append(fileData[:nTime], append([]byte(tn), fileData[nTime+len(tn):]...)...)
-			res = append(fileData[:nCounter], append([]byte(tn), fileData[nCounter+len(tn):]...)...)
-			err := os.WriteFile("/app/static/_index.md", res, 0644)
-			if err != nil {
-				log.Println(err)
+			if i%5 == 0 {
+				err := os.WriteFile("/app/static/tasks/_index.md", bytes.Join(lines, []byte("\n")), 644)
+				if err != nil {
+					log.Println(err)
+				}
+				b++
 			}
-			b++
 		}
+		i++
 	}
 }
