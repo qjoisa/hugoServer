@@ -3,6 +3,7 @@ package tree
 import (
 	"fmt"
 	"math/rand"
+	"time"
 )
 
 type Node struct {
@@ -19,6 +20,7 @@ type AVLTree struct {
 
 func GenerateTree(count int) *AVLTree {
 	t := &AVLTree{nCount: 0}
+	rand.Seed(time.Now().Unix())
 	for i := 0; i < count; i++ {
 		key := rand.Intn(1000)
 		t.Insert(key)
