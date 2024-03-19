@@ -48,9 +48,7 @@ func (rp *ReverseProxy) ReverseProxy(next http.Handler) http.Handler {
 			r.SetURL(&url.URL{Scheme: "http", Host: rp.host + ":" + rp.port})
 			r.SetXForwarded()
 		}}
-		//httputil.NewSingleHostReverseProxy(&url.URL{Scheme: "http", Host: rp.host + ":" + rp.port}).ServeHTTP(w, r)
 		rev.ServeHTTP(w, r)
-
 	})
 }
 
@@ -59,12 +57,10 @@ func APIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello from API"))
 }
 
-const content = ``
-
 func WorkerTest() {
-	t := time.NewTicker(1 * time.Second)
+	t := time.NewTicker(5 * time.Second)
 	var tn string
-	var b, i int = 0, 0
+	var b int = 0
 	var counterLine, timeLine int
 	fileData, err := os.ReadFile("/app/static/tasks/_index.md")
 	if err != nil {
@@ -81,19 +77,16 @@ func WorkerTest() {
 	}
 
 	for {
-		tn = time.Now().Format("2006-01-02 15:04:05")
-		lines[timeLine] = []byte("Текущее время: " + tn)
-		lines[counterLine] = []byte("Счетчик: " + strconv.Itoa(b))
 		select {
 		case <-t.C:
-			if i%5 == 0 {
-				err := os.WriteFile("/app/static/tasks/_index.md", bytes.Join(lines, []byte("\n")), 644)
-				if err != nil {
-					log.Println(err)
-				}
-				b++
+			tn = time.Now().Format("2006-01-02 15:04:05")
+			lines[timeLine] = []byte("Текущее время: " + tn)
+			lines[counterLine] = []byte("Счетчик: " + strconv.Itoa(b))
+			err := os.WriteFile("/app/static/tasks/_index.md", bytes.Join(lines, []byte("\n")), 644)
+			if err != nil {
+				log.Println(err)
 			}
+			b++
 		}
-		i++
 	}
 }
