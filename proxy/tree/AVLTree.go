@@ -42,7 +42,8 @@ func (t *AVLTree) ToMermaid() string {
 		if current.Left != nil {
 			tree += fmt.Sprintf("%v--> %v\n", current.Key, current.Left.Key)
 			stack = append(stack, current.Left)
-		} else if current.Right != nil {
+		}
+		if current.Right != nil {
 			tree += fmt.Sprintf("%v--> %v\n", current.Key, current.Right.Key)
 			stack = append(stack, current.Right)
 		}
