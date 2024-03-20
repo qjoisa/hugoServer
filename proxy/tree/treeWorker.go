@@ -26,14 +26,18 @@ func Worker() {
 			last = i
 		}
 	}
-
+	var old = make([]byte, len(fileData))
+	copy(old, fileData)
 	for {
 		select {
 		case <-t.C:
 			avl.Insert(rand.Intn(1000))
 			mm := avl.ToMermaid()
 			fileData = append(fileData[:first], append([]byte(mm), fileData[last:]...)...)
-			log.Fatal(os.WriteFile("/app/static/tasks/binary.md", bytes.Join(lines, []byte("\n")), 644))
+			err := os.WriteFile("/app/static/tasks/binary.md", fileData, 644)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 }
