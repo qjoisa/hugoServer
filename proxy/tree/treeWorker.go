@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-var dbug = "/home/qjoisa/go/src/middleware/hugoproxy/hugo/content/tasks/binary.md"
 var path = "/app/static/tasks/binary.md"
 
 func Worker() {

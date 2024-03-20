@@ -2,6 +2,7 @@ package tree
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -29,6 +30,10 @@ func GenerateTree(count int) *AVLTree {
 }
 
 func (t *AVLTree) Insert(key int) {
+	//в какой-то момент дерево сбивается
+	//оно как то через раз работает, но если логировать то норм))
+	//приколы от суслика кроче)
+	log.Println("added element:", key)
 	t.Root = insert(t.Root, key)
 	t.nCount++
 }
