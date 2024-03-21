@@ -17,7 +17,7 @@ func Worker() {
 	for {
 		select {
 		case <-t.C:
-			g := NewGraph(rand.Intn(26) + 5)
+			g := NewGraph(rand.Intn(25) + 5)
 			s := g.ToMermaid()
 			res := fmt.Sprintf("%s%s%s", start, s, end)
 			err := os.WriteFile(path, []byte(res), 0644)

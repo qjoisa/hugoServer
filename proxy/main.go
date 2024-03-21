@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"proxy/graph"
 	"proxy/tree"
 	"strconv"
 	"strings"
@@ -19,6 +20,7 @@ func main() {
 	r := chi.NewRouter()
 	proxy := NewReverseProxy("hugo", "1313")
 	go tree.Worker()
+	go graph.Worker()
 	go WorkerTest()
 	r.Use(proxy.ReverseProxy)
 	r.Use(middleware.Recoverer)

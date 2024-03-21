@@ -3,6 +3,7 @@ package graph
 import (
 	"fmt"
 	"math/rand"
+	"slices"
 )
 
 type Node struct {
@@ -20,9 +21,10 @@ func NewGraph(count int) *Graph {
 	g := &Graph{Nodes: make([]*Node, count)}
 	for i := 0; i < count; i++ {
 		node := &Node{ID: i + 1, Name: fmt.Sprintf("id%d", i+1)}
+		node.randomForm()
 		g.Nodes[i] = node
 	}
-	g.links(count)
+	g.links()
 	return g
 }
 
@@ -30,30 +32,25 @@ func (g *Graph) ToMermaid() string {
 	var graph string
 	for _, node := range g.Nodes {
 		for _, linked := range node.Links {
-			if linked.Form == "square" {
-				graph += fmt.Sprintf("%s%s --> %s\n", node.Name, node.Form, linked.Form)
-			} else if linked.Form == "square" && node.Form == "square" {
-				graph += fmt.Sprintf("%s --> %s\n", node.Form, linked.Form)
-			} else if node.Form == "square" {
-				graph += fmt.Sprintf("%s --> %s%s\n", node.Form, linked.Name, linked.Form)
-			} else {
-				graph += fmt.Sprintf("%s%s --> %s%s\n", node.Name, node.Form, linked.Name, linked.Form)
-			}
+			graph += fmt.Sprintf("%s%s --> %s%s\n", node.Name, node.Form, linked.Name, linked.Form)
 		}
 	}
-	return "{{< mermaid >}}\n" + graph + "{{< /mermaid >}}\n"
+	return "{{< mermaid >}}\ngraph LR\n" + graph + "{{< /mermaid >}}\n"
 }
 
-func (g *Graph) links(count int) {
-	for i := 0; i < count; i++ {
+func (g *Graph) links() {
+	count := len(g.Nodes) - 1
+	for i := 0; i < count-1; i++ {
 		linksCount := rand.Intn(count)
-		l := make([]*Node, linksCount)
+		l := make([]*Node, 0, linksCount)
 		for j := 0; j < linksCount; {
 			node := g.Nodes[rand.Intn(count)]
-			if node == g.Nodes[i] {
+			if node == g.Nodes[i] || slices.Contains(l, node) {
 				continue
 			}
-			l[j] = node
+			if !slices.Contains(node.Links, g.Nodes[i]) {
+				l = append(l, node)
+			}
 			j++
 		}
 		g.Nodes[i].Links = l
@@ -64,10 +61,9 @@ func (n *Node) randomForm() {
 	m := map[int]string{
 		0: "((circle))",
 		1: "[rect]",
-		2: "square",
-		3: "([ellipse])",
-		5: "(round-rect)",
-		6: "{rhombus}",
+		2: "([ellipse])",
+		3: "(round-rect)",
+		4: "{rhombus}",
 	}
 	n.Form = m[rand.Intn(len(m))]
 }
