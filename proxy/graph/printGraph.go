@@ -1,6 +1,9 @@
 package graph
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Node struct {
 	ID    int
@@ -15,18 +18,30 @@ type Graph struct {
 
 func NewGraph(count int) *Graph {
 	g := &Graph{Nodes: make([]*Node, count)}
-	var name string
 	for i := 0; i < count; i++ {
-		if 65+i <= 90 {
-			name = string(byte(65 + i))
-		} else {
-			name = string([]byte{byte(65 + i), byte(i - 24)})
-		}
-		node := &Node{ID: i + 1, Name: name}
+		node := &Node{ID: i + 1, Name: fmt.Sprintf("id%d", i+1)}
 		g.Nodes[i] = node
 	}
 	g.links(count)
 	return g
+}
+
+func (g *Graph) ToMermaid() string {
+	var graph string
+	for _, node := range g.Nodes {
+		for _, linked := range node.Links {
+			if linked.Form == "square" {
+				graph += fmt.Sprintf("%s%s --> %s\n", node.Name, node.Form, linked.Form)
+			} else if linked.Form == "square" && node.Form == "square" {
+				graph += fmt.Sprintf("%s --> %s\n", node.Form, linked.Form)
+			} else if node.Form == "square" {
+				graph += fmt.Sprintf("%s --> %s%s\n", node.Form, linked.Name, linked.Form)
+			} else {
+				graph += fmt.Sprintf("%s%s --> %s%s\n", node.Name, node.Form, linked.Name, linked.Form)
+			}
+		}
+	}
+	return "{{< mermaid >}}\n" + graph + "{{< /mermaid >}}\n"
 }
 
 func (g *Graph) links(count int) {
@@ -47,12 +62,12 @@ func (g *Graph) links(count int) {
 
 func (n *Node) randomForm() {
 	m := map[int]string{
-		0: "circle",
-		1: "rect",
+		0: "((circle))",
+		1: "[rect]",
 		2: "square",
-		3: "ellipse",
-		5: "round-rect",
-		6: "rhombus",
+		3: "([ellipse])",
+		5: "(round-rect)",
+		6: "{rhombus}",
 	}
 	n.Form = m[rand.Intn(len(m))]
 }
