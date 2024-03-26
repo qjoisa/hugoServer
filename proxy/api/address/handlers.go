@@ -34,8 +34,9 @@ func GeocodeHandle(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&gc)
 	if err != nil {
-		log.Println(err)
+		log.Printf("error: %v\nBody must be: '{\"lat\": \"anylatitude\", \"lng\":\"anuLongitude\"}'", err)
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Body must be: '{\"lat\": \"anylatitude\", \"lng\":\"anuLongitude\"}'"))
 		return
 	}
 	defer r.Body.Close()
@@ -60,12 +61,12 @@ func GeocodeHandle(w http.ResponseWriter, r *http.Request) {
 
 func SearchHandle(w http.ResponseWriter, r *http.Request) {
 	var address ResponseAddress
-
 	sq := SearchRequest{}
 	err := json.NewDecoder(r.Body).Decode(&sq)
 	if err != nil {
-		fmt.Printf("error: %v\nBody must be: {\"query\": \"{any address}\"", err)
+		fmt.Printf("error: %v\nBody must be: '{\"query\": \"any address\"}'", err)
 		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Body must be: '{\"query\": \"any address\"}'"))
 		return
 	}
 	defer r.Body.Close()
