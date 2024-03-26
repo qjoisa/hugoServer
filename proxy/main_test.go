@@ -85,7 +85,7 @@ func TestReverseProxy_ReverseProxy(t *testing.T) {
 	}{
 		{
 			name:   "api",
-			fields: fields{host: "localhost", port: "1313"},
+			fields: fields{host: "localhost", port: "8080"},
 			args: args{
 				method: "GET",
 				path:   "/api/",

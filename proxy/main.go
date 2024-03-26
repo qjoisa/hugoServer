@@ -9,6 +9,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"proxy/api/address"
 	"proxy/graph"
 	"proxy/tree"
 	"strconv"
@@ -25,9 +26,14 @@ func main() {
 	r.Use(proxy.ReverseProxy)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/api/*", APIHandler)
+	r.Route("/api/", APIRoutes)
 
 	http.ListenAndServe(":8080", r)
+}
+
+func APIRoutes(r chi.Router) {
+	r.Get("/", APIHandler)
+	r.Route("/address/", address.AddressRoutes)
 }
 
 type ReverseProxy struct {
